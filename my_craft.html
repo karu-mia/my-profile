@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>雪 - ｍｙプロフィール</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+    /* 背景アニメーション＋ぼかし */
+    body {
+        font-family: 'Arial', sans-serif;
+        text-align: center;
+        background: linear-gradient(-45deg, rgba(255,0,0,0.5), rgba(255,115,0,0.5), rgba(0,0,255,0.5), rgba(128,0,255,0.5));
+        background-size: 400% 400%;
+        animation: gradientBG 10s ease infinite;
+        color: #fff;
+        margin: 0;
+        overflow: hidden;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        position: relative;
+    }
+    @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+    }
+
+    .profile-img {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #fff;
+        margin-bottom: 20px;
+        box-shadow: 0 6px 14px rgba(0,0,0,0.3);
+    }
+    h1 { font-size: 32px; margin: 5px 0; }
+    p { font-size: 18px; margin-bottom: 20px; }
+
+    /* スライダー */
+    .intro-slider {
+        position: relative;
+        width: 90%;
+        max-width: 500px;
+        height: 300px;
+        overflow: hidden;
+        margin: 30px auto;
+        border-radius: 15px;
+        padding: 15px;
+        background: rgba(255,255,255,0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    .intro-slide {
+        position: absolute;
+        width: 100%;
+        top: 0;
+        left: 100%;
+        opacity: 0;
+        transform: translateX(50px) scale(0.9);
+        transition: all 0.8s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+    .intro-slide.active {
+        left: 0;
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+
+    .intro-box {
+        background: rgba(255,255,255,0.15);
+        border-radius: 10px;
+        padding: 10px;
+        font-size: 18px;
+        line-height: 1.6;
+        text-align: center;
+        backdrop-filter: blur(6px);
+    }
+
+    .intro-img {
+        max-width: 100%;
+        max-height: 220px;
+        border-radius: 10px;
+        object-fit: contain;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    /* 矢印ボタン */
+    .arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.25);
+        border: none;
+        color: #fff;
+        font-size: 28px;
+        padding: 14px;
+        cursor: pointer;
+        border-radius: 50%;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        transition: background 0.3s ease, transform 0.3s ease;
+        z-index: 10;
+    }
+    .arrow:hover {
+        background: rgba(255, 255, 255, 0.5);
+        transform: translateY(-50%) scale(1.1);
+    }
+    .arrow.left { left: 10px; }
+    .arrow.right { right: 10px; }
+
+    /* 丸型インジケータ */
+    .indicator {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 20px;
+    }
+    .dot {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        cursor: pointer;
+    }
+    .dot svg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        transform: rotate(-90deg);
+    }
+    .dot circle {
+        fill: none;
+        stroke-width: 3;
+        stroke: url(#gradient);
+        stroke-dasharray: 69;
+        stroke-dashoffset: 69;
+    }
+    .dot.active circle {
+        animation: progressCircle 6s linear forwards;
+    }
+    @keyframes progressCircle {
+        from { stroke-dashoffset: 69; }
+        to { stroke-dashoffset: 0; }
+    }
+
+    /* Twitterボタン → ガラス風 */
+    .link-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 90%;
+        max-width: 280px;
+        margin: 20px auto;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #fff;
+        text-decoration: none;
+        font-size: 20px;
+        font-weight: bold;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    .link-btn i { font-size: 22px; }
+    .link-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+        transform: scale(1.05);
+    }
+</style>
+</head>
+<body>
+    <!-- パーティクルCanvas -->
+    <canvas id="particles"></canvas>
+
+    <!-- SVGグラデーション -->
+    <svg width="0" height="0">
+        <defs>
+            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#ff7f50"/>
+                <stop offset="50%" stop-color="#ff1493"/>
+                <stop offset="100%" stop-color="#1e90ff"/>
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <!-- プロフィール -->
+    <img src="20230401_182326.jpg" alt="プロフィール" class="profile-img">
+    <h1>雪</h1>
+    <p>原神enjoy勢</p>
+
+    <!-- スライダー -->
+    <div class="intro-slider">
+        <div class="intro-slide active">
+            <div class="intro-box">好きなキャラ：胡桃</div>
+            <img src="20250503151343.png" alt="胡桃" class="intro-img">
+        </div>
+        <div class="intro-slide">
+            <div class="intro-box">趣味：ゲーム・音楽</div>
+            <img src="20250503214137.png" alt="趣味画像" class="intro-img">
+        </div>
+        <div class="intro-slide">
+            <div class="intro-box">
+                <b>gender</b> / <b>birthday</b> / <b>age</b><br>
+                ♂ / 0803 / 24
+            </div>
+            <img src="20250505214146.png" alt="原神" class="intro-img">
+        </div>
+        <div class="intro-slide">
+            <div class="intro-box">live - 関東 -</div>
+            <img src="20250413220207.png" alt="推し活" class="intro-img">
+        </div>
+        <!-- 矢印ボタン -->
+        <button class="arrow left"><i class="fas fa-chevron-left"></i></button>
+        <button class="arrow right"><i class="fas fa-chevron-right"></i></button>
+    </div>
+
+    <!-- 丸型インジケータ -->
+    <div class="indicator"></div>
+
+    <!-- Twitter -->
+    <a href="https://x.com/G_tyousiwarui_z" class="link-btn" target="_blank">
+        <i class="fab fa-twitter"></i> Twitter
+    </a>
+
+<script>
+    const slides = document.querySelectorAll('.intro-slide');
+    const prevBtn = document.querySelector('.arrow.left');
+    const nextBtn = document.querySelector('.arrow.right');
+    const indicator = document.querySelector('.indicator');
+    let current = 0;
+    let autoSlideInterval;
+    const duration = 6000; // 6秒
+
+    // 丸型インジケータ生成
+    slides.forEach((_, i) => {
+        const dot = document.createElement('div');
+        dot.classList.add('dot');
+        dot.innerHTML = `<svg width="22" height="22">
+                            <circle cx="11" cy="11" r="11"></circle>
+                         </svg>`;
+        if (i === 0) dot.classList.add('active');
+        dot.addEventListener('click', () => {
+            current = i;
+            updateSlides();
+            restartAutoSlide();
+        });
+        indicator.appendChild(dot);
+    });
+    const dots = document.querySelectorAll('.dot');
+
+    function resetCircle(circle) {
+        circle.style.animation = 'none';
+        circle.offsetHeight;
+        circle.style.animation = null;
+    }
+
+    function updateSlides() {
+        slides.forEach((slide, i) => slide.classList.toggle('active', i === current));
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === current);
+            const circle = dot.querySelector('circle');
+            resetCircle(circle);
+            if (i === current) {
+                circle.style.animation = `progressCircle ${duration / 1000}s linear forwards`;
+            }
+        });
+    }
+
+    prevBtn.addEventListener('click', () => {
+        current = (current - 1 + slides.length) % slides.length;
+        updateSlides();
+        restartAutoSlide();
+    });
+
+    nextBtn.addEventListener('click', () => {
+        current = (current + 1) % slides.length;
+        updateSlides();
+        restartAutoSlide();
+    });
+
+    function autoSlide() {
+        current = (current + 1) % slides.length;
+        updateSlides();
+    }
+
+    function restartAutoSlide() {
+        clearInterval(autoSlideInterval);
+        autoSlideInterval = setInterval(autoSlide, duration);
+    }
+
+    restartAutoSlide();
+
+    // パーティクル（淡い虹色）
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    let particlesArray = [];
+    const numParticles = 60;
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 3 + 1;
+            this.speedX = (Math.random() - 0.5) * 0.5;
+            this.speedY = (Math.random() - 0.5) * 0.5;
+            this.color = `hsl(${Math.random() * 360}, 80%, 80%)`;
+        }
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+            if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+            if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+        }
+        draw() {
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    function initParticles() {
+        particlesArray = [];
+        for (let i = 0; i < numParticles; i++) {
+            particlesArray.push(new Particle());
+        }
+    }
+
+    function animateParticles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particlesArray.forEach(p => {
+            p.update();
+            p.draw();
+        });
+        requestAnimationFrame(animateParticles);
+    }
+
+    initParticles();
+    animateParticles();
+</script>
+</body>
+</html>
